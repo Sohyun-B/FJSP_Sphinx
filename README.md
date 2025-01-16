@@ -7,4 +7,4 @@
   - 특정 시간에 특정 machine 혹은 job을 수행하지 못하는 machine constrain / job constrain 추가
 
 ## Acknowledgements
-This project uses code from [Incalos/FJSP-With-Genetic-Algorithm]([https://github.com/username/repository-name]).
+This project uses code from [Incalos/FJSP-With-Genetic-Algorithm](https://github.com/Incalos/FJSP-With-Genetic-Algorithm).
