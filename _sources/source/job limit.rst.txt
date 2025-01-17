@@ -1,0 +1,7 @@
+job limit module
+================
+
+.. automodule:: job limit
+   :members:
+   :undoc-members:
+   :show-inheritance:

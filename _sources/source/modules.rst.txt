@@ -1,0 +1,15 @@
+FJSP
+====
+
+.. toctree::
+   :maxdepth: 4
+
+   Decode
+   Encode
+   GA
+   Instance
+   Job
+   Machine
+   conf
+   job limit
+   main

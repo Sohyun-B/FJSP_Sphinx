@@ -1,0 +1,7 @@
+Instance module
+===============
+
+.. automodule:: Instance
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+Encode module
+=============
+
+.. automodule:: Encode
+   :members:
+   :undoc-members:
+   :show-inheritance:

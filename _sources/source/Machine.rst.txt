@@ -1,0 +1,7 @@
+Machine module
+==============
+
+.. automodule:: Machine
+   :members:
+   :undoc-members:
+   :show-inheritance:

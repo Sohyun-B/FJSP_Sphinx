@@ -1,0 +1,7 @@
+Decode module
+=============
+
+.. automodule:: Decode
+   :members:
+   :undoc-members:
+   :show-inheritance:
