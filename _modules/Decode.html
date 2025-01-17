@@ -1,0 +1,321 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Decode &mdash; FJSP 1.0.0 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5a0dd2f0"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=b5f768d8"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FJSP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FJSP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">모듈 코드</a></li>
+      <li class="breadcrumb-item active">Decode</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Decode의 소스 코드</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">Job</span> <span class="kn">import</span> <span class="n">Job</span>
+<span class="kn">from</span> <span class="nn">Machine</span> <span class="kn">import</span> <span class="n">Machine_Time_window</span>
+
+
+<div class="viewcode-block" id="Decode">
+<a class="viewcode-back" href="../source/Decode.html#Decode.Decode">[문서]</a>
+<span class="k">class</span> <span class="nc">Decode</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    염색체를 기반으로 작업(Job)과 기계(Machine)의 스케줄링을 수행하는 클래스</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        Processing_time (list): 각 작업(Job)과 공정(Operation)의 처리 시간 행렬</span>
+<span class="sd">        M_num (int): 사용 가능한 총 기계(Machine) 수</span>
+<span class="sd">        J (dict): 각 작업(job)애 대한 공정(operation) 수를 나타내는 딕셔너리</span>
+<span class="sd">        Machines (list): Machine_Time_window 객체를 저장하는 리스트</span>
+<span class="sd">        Scheduled (list): 스케줄링된 작업(Operation) 목록</span>
+<span class="sd">        fitness (int): 현재 스케줄링의 makespan, 전체 작업 완료 시간</span>
+<span class="sd">        Machine_State (numpy.ndarray): 각 기계(Machine)의 현재 상태를 나타내는 배열</span>
+<span class="sd">        Jobs (list): Job 객체를 저장하는 리스트</span>
+<span class="sd">        </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">Processing_time</span><span class="p">,</span> <span class="n">M_num</span><span class="p">,</span> <span class="n">Job_constrains</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">Machine_constrains</span><span class="o">=</span><span class="p">[]):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decode 클래스의 초기화 매서드</span>
+
+<span class="sd">        Attributes: </span>
+<span class="sd">            J (dict): 각 작업(job)애 대한 공정(operation) 수를 나타내는 딕셔너리</span>
+<span class="sd">            Processing_time (list): 각 작업(Job)과 공정(Operation)의 처리 시간 행렬</span>
+<span class="sd">            M_num (int): 사용 가능한 총 기계(Machine) 수</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">Processing_time</span> <span class="o">=</span> <span class="n">Processing_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M_num</span> <span class="o">=</span> <span class="n">M_num</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">J</span> <span class="o">=</span> <span class="n">J</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Machines</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Stores machine objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Scheduled</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Operations that have been scheduled</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># Fitness value, makespan</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Machine_State</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">M_num</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># Tracks which job is being processed on each machine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Jobs</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Stores job objects</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Machine_constrains</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># machine constrain이 존재하는 경우</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M_num</span><span class="p">):</span>  <span class="c1"># Iterate through machine numbers 0 to 11</span>
+                <span class="c1"># Filter constraints for the current machine index j</span>
+                <span class="n">machine_constrain</span> <span class="o">=</span> <span class="p">[</span><span class="n">constraint</span> <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">Machine_constrains</span> <span class="k">if</span> <span class="n">constraint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">j</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Machines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Machine_Time_window</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">machine_constrain</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">M_num</span><span class="p">):</span> <span class="c1"># 각 기계 번호 0~11</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Machines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Machine_Time_window</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>  <span class="c1"># 각 머신마다 time window 제작. machine n 은 n-1 번mport numpy as np</span>
+
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Job_constrains</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># machine constrain이 존재하는 경우</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">J</span><span class="o">.</span><span class="n">items</span><span class="p">():</span> <span class="c1"># Jobs = [(1:5),(2:5),(3,5),(4:8),(5:8),(6:8),(7:8)</span>
+                <span class="n">job_constrain</span> <span class="o">=</span> <span class="p">[</span><span class="n">constraint</span> <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">Job_constrains</span> <span class="k">if</span> <span class="n">constraint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">k</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Job</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">job_constrain</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">J</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Job</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+
+
+
+    <span class="c1"># Time order matrix and machine order matrix, converted based on the MS part of the chromosome</span>
+<div class="viewcode-block" id="Decode.Order_Matrix">
+<a class="viewcode-back" href="../source/Decode.html#Decode.Decode.Order_Matrix">[문서]</a>
+    <span class="k">def</span> <span class="nf">Order_Matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MS</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        염색체의 MS(Machine Selection)를 기반으로 JM(Job Matrix)과 T(Time Matrix)를 생성하는 함수</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            MS (list): 염색체의 Machine Selection. 각 값은 특정 공정(Operation)이 할당된 기계(Machine)의 P_t에서의 상대적 숫자를 나타내는 2차원 리스트 </span>
+<span class="sd">        Note: </span>
+<span class="sd">            MS는 &#39;9999&#39;인 machine을 무시하기 때문에, MS의 0, 1, 2의 값은 Processing_time의 &#39;9999&#39;가 아닌 것의 순서</span>
+<span class="sd">                ex)  [9999, 9999, 9999, 9999, 15, 25, 21, 9999, 9999, 9999, 9999, 9999] 인 경우, </span>
+<span class="sd">                    MS[i]==0이면 processing_time=15인 machine#5,</span>
+<span class="sd">                    MS[i]==1이면 processing_time=25인 machine#6..</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple:</span>
+<span class="sd">                - JM (list): 염색체의 Job Selection. 각 값은 특정 공정(Operation)이 할당된 기계(Machine)의 숫자를 나타내는 2차원 리스트</span>
+<span class="sd">                - T (list): 각 공정(operation)이 할당된 기계(machine)에서의 처리 시간을 나타내는 2차원 리스트</span>
+<span class="sd">                </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">JM</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Ms_decompose</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">Site</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="c1"># MS를 Job별로 분리</span>
+        <span class="c1"># ex) MS = [0, 1, 2, 0, 1]이고 job1은 opertion이 2개, job2는 operation이 3개라고 하면</span>
+        <span class="c1"># [[0, 1, 2], [0, 1]]로 job별로 분리</span>
+        <span class="k">for</span> <span class="n">S_i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">J</span><span class="o">.</span><span class="n">values</span><span class="p">():</span> <span class="c1"># [ 5, 5, 5, 8, 8, 8, 8 ]</span>
+            <span class="n">Ms_decompose</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MS</span><span class="p">[</span><span class="n">Site</span><span class="p">:</span><span class="n">Site</span> <span class="o">+</span> <span class="n">S_i</span><span class="p">])</span>
+            <span class="n">Site</span> <span class="o">+=</span> <span class="n">S_i</span> 
+            
+        <span class="k">for</span> <span class="n">job</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Ms_decompose</span><span class="p">)):</span>  <span class="c1"># Job의 개수만큼(여기서는 7개) iteration</span>
+            <span class="n">JM_job</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># Job job의 operation을 실행하는 기계</span>
+            <span class="n">T_job</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># Job job의 operation의 수행 시간</span>
+            <span class="k">for</span> <span class="n">operation</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Ms_decompose</span><span class="p">[</span><span class="n">job</span><span class="p">])):</span>  <span class="c1"># 각 job의 operation 수만큼 반복</span>
+                <span class="n">O_operation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Processing_time</span><span class="p">[</span><span class="n">job</span><span class="p">][</span><span class="n">operation</span><span class="p">]</span>  <span class="c1"># Processing_time[job][operation] 해당 job의 operation의 머신별 수행시간 리스트</span>
+                <span class="n">M_jobop</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># 특정 job의 operation들의 할당할 수 있는 기계를 보여주는 이차원배열</span>
+                <span class="n">T_jobop</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># 특정 job의 operation들의 할당할 수 있는 기계들의 실행시간을 보여주는 이차원배열</span>
+                <span class="k">for</span> <span class="n">Mac_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">O_operation</span><span class="p">)):</span>  <span class="c1"># 머신 개수만큼 반복</span>
+                    <span class="k">if</span> <span class="n">O_operation</span><span class="p">[</span><span class="n">Mac_num</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9999</span><span class="p">:</span> <span class="c1"># 9999 아닌 경우, 즉 해당 operation을 수행하는 머신인경우</span>
+                        <span class="n">M_jobop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Mac_num</span><span class="p">)</span> <span class="c1"># ex) M_jobop = [4,5,6], 9999가 아닌 기계 리스트</span>
+                        <span class="n">T_jobop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">O_operation</span><span class="p">[</span><span class="n">Mac_num</span><span class="p">])</span> <span class="c1"># ex) T_jobop = [15, 25, 21], 9999가 아닌 기계의 작동 시간 리스트</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">continue</span> <span class="c1"># 해당 operation을 수행하지 않는 기계이므로 pass</span>
+                <span class="c1"># Ms_decompose[job][operation] : 해당 job의 operation의 상태적인 순서인 int</span>
+                <span class="c1"># M_jobop[Ms_decompose[job][operation]] = Ms_decompose의 상대적인(9999를 제외한) 순서를 절대적인(9999가 있는 p_t에서의 순서로 변환된 값</span>
+                <span class="n">JM_job</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">M_jobop</span><span class="p">[</span><span class="n">Ms_decompose</span><span class="p">[</span><span class="n">job</span><span class="p">][</span><span class="n">operation</span><span class="p">]])</span>
+                <span class="n">T_job</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T_jobop</span><span class="p">[</span><span class="n">Ms_decompose</span><span class="p">[</span><span class="n">job</span><span class="p">][</span><span class="n">operation</span><span class="p">]])</span>
+            <span class="n">JM</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">JM_job</span><span class="p">)</span> 
+            <span class="n">T</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T_job</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">JM</span><span class="p">,</span> <span class="n">T</span></div>
+
+
+    
+    <span class="c1"># 특정 job의 n번째 operation에 대해 특정 machine에서 시작할 수 있는 가장 빠른 시간을 구해준다</span>
+<div class="viewcode-block" id="Decode.Earliest_Start">
+<a class="viewcode-back" href="../source/Decode.html#Decode.Decode.Earliest_Start">[문서]</a>
+    <span class="k">def</span> <span class="nf">Earliest_Start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Job</span><span class="p">,</span> <span class="n">O_num</span><span class="p">,</span> <span class="n">Machine</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        특정 작업(job)의 n번째 공정(operation)이 특정 기계(machine)에서 시작할 수 있는 가장 빠른 시간을 계산.</span>
+<span class="sd">        해당 작업(job)의 이전 공정(operation)의 종료 시기와 사용하는 기계(machine)의 이전 수행의 종료 시기 중 더 느린 것을 택한다.</span>
+<span class="sd">        Args: </span>
+<span class="sd">            Job (int): 현재 스케줄링 중인 작업 (job)의 인덱스</span>
+<span class="sd">            O_num (int): 작업(job) 내 현재 공정(operation)의 인덱스</span>
+<span class="sd">            Machine (int): 현재 공정(operation)을 진행하는 기계(machine)의 인덱스</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple:</span>
+<span class="sd">                - M_Ealiest (int): 해당 공정(operation)이 해당 기계(machine)에서 가장 빠르게 시작할 수 있는 시간</span>
+<span class="sd">                - Selected_Machine (int): 해당 기계(machine) 번호</span>
+<span class="sd">                - P_t (int): 해당 공정(operation)의 수행 시간</span>
+<span class="sd">                - O_num (int): 해당 공정(operation)의 번호</span>
+<span class="sd">                - last_O_end (int): 해당 기계(machine)의 공정(operation)을 삽입하기 전의 종료 시각</span>
+<span class="sd">                - End_work_time (int): 해당 기계(machine)에 공정(operation)을 삽입한 뒤의 종료시각</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">P_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Processing_time</span><span class="p">[</span><span class="n">Job</span><span class="p">][</span><span class="n">O_num</span><span class="p">][</span><span class="n">Machine</span><span class="p">]</span> <span class="c1"># 해당 operation의 처리시간 </span>
+        <span class="n">last_O_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Jobs</span><span class="p">[</span><span class="n">Job</span><span class="p">]</span><span class="o">.</span><span class="n">Last_Processing_end_time</span>  <span class="c1"># 해당 job의 이전 operation의 종료시간</span>
+        <span class="n">Selected_Machine</span> <span class="o">=</span> <span class="n">Machine</span>
+        <span class="n">M_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Machines</span><span class="p">[</span><span class="n">Selected_Machine</span><span class="p">]</span><span class="o">.</span><span class="n">Empty_time_window</span><span class="p">()</span>  <span class="c1"># 현재 machine의 empty window 가져오기</span>
+        <span class="n">M_Tstart</span> <span class="o">=</span> <span class="n">M_window</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># 빈 시간 창의 시작 시간 리스트</span>
+        <span class="n">M_Tend</span> <span class="o">=</span> <span class="n">M_window</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># 빈 시간 창의 종료 시간 리스트</span>
+        <span class="n">M_Tlen</span> <span class="o">=</span> <span class="n">M_window</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="c1"># 빈 시간 창의 길이 리스트</span>
+        <span class="n">Machine_end_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Machines</span><span class="p">[</span><span class="n">Selected_Machine</span><span class="p">]</span><span class="o">.</span><span class="n">End_time</span> <span class="c1"># 현재 machine의 마지막 operation 종료시간</span>
+        <span class="n">ealiest_start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">last_O_end</span><span class="p">,</span> <span class="n">Machine_end_time</span><span class="p">)</span> <span class="c1"># job의 이전 operation이 끝나는 시간과 사용하는 머신의 이전 operation이 끝나는 시간 중 더 늦은 것 택</span>
+       
+        <span class="k">if</span> <span class="n">M_Tlen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># empty window time slot이 비어있지 않을때</span>
+            <span class="k">for</span> <span class="n">le_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">M_Tlen</span><span class="p">)):</span> <span class="c1"># 모든 empty window time slot에 대해서 반복</span>
+                <span class="k">if</span> <span class="n">M_Tlen</span><span class="p">[</span><span class="n">le_i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">P_t</span><span class="p">:</span> <span class="c1"># empty window slot의 사이즈가 P_t보다 길고 (들어갈 수 있을만큼 empty window slot의 크기가 큼)</span>
+                    <span class="c1"># 현재 empty window slot의 시작 시간(M_Tstart[le_i])이 해당 job의 이전 operation의 종료시간보다 작으면 insert</span>
+                    <span class="k">if</span> <span class="n">M_Tstart</span><span class="p">[</span><span class="n">le_i</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">last_O_end</span><span class="p">:</span>
+                        <span class="n">ealiest_start</span> <span class="o">=</span> <span class="n">M_Tstart</span><span class="p">[</span><span class="n">le_i</span><span class="p">]</span>
+                        <span class="k">break</span>
+                    <span class="c1"># 현재 empty window slot의 시작 시간이, 해당 job의 이전 operation의 종료시간보다 크지만</span>
+                    <span class="c1"># last_O_end가 시작하는 시간에서, empty window slot이 끝나는 시간까지가 p_t보다 긴 경우  (M_Tend[le_i] - last_O_end) -&gt; insert 가능</span>
+                    <span class="k">if</span> <span class="n">M_Tstart</span><span class="p">[</span><span class="n">le_i</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">last_O_end</span> <span class="ow">and</span> <span class="n">M_Tend</span><span class="p">[</span><span class="n">le_i</span><span class="p">]</span> <span class="o">-</span> <span class="n">last_O_end</span> <span class="o">&gt;=</span> <span class="n">P_t</span><span class="p">:</span>
+                        <span class="n">ealiest_start</span> <span class="o">=</span> <span class="n">last_O_end</span> <span class="c1"># 이전 operation이 끝나는 시간이 다음 거 시작하는 시간</span>
+                        <span class="k">break</span>
+        <span class="c1">#  빈 창이 존재하지 않는다면 earliest_start를 그대로 사용</span>
+        <span class="c1">#  맨 마지막에 operation이 할당되기에 End_work_time이 P_t만큼 더하여 업데이트 된다</span>
+        <span class="c1"># last_O_end는 업데이트 되지 않고 end_of_work만 업데이트됨</span>
+        <span class="n">M_Ealiest</span> <span class="o">=</span> <span class="n">ealiest_start</span>  
+        <span class="n">End_work_time</span> <span class="o">=</span> <span class="n">M_Ealiest</span> <span class="o">+</span> <span class="n">P_t</span>  
+        <span class="k">return</span> <span class="n">M_Ealiest</span><span class="p">,</span> <span class="n">Selected_Machine</span><span class="p">,</span> <span class="n">P_t</span><span class="p">,</span> <span class="n">O_num</span><span class="p">,</span> <span class="n">last_O_end</span><span class="p">,</span> <span class="n">End_work_time</span></div>
+
+
+    <span class="c1"># Decoding operation</span>
+<div class="viewcode-block" id="Decode.decode">
+<a class="viewcode-back" href="../source/Decode.html#Decode.Decode.decode">[문서]</a>
+    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CHS</span><span class="p">,</span> <span class="n">Len_Chromo</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        하나의 염색체를 기반으로 스케줄링을 수행하고 Makespan을 계산</span>
+
+<span class="sd">        Args: </span>
+<span class="sd">            CHS (list): 하나의 염색체 배열, 앞부분은 MS, 뒷부분은 OS로 구성</span>
+<span class="sd">            Lem_Chromo (int): MS와 OS를 분리하는 기준점. CHS 배열 길이의 중간</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            int: fitness value, 해당 CHS의 makespan 값</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            염색체 안의 값들의 순서대로 머신에 추가된다</span>
+<span class="sd">            만약 job할당 시 timeslot을 만날 경우 job 클래스에서 만든 대로 처리되어서 해당 operation의 처리 시간이 늘어난다.</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># d.decode(CHS[i]: 길이 94의 일차원배열, Len: 47)</span>
+        <span class="n">MS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">CHS</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">Len_Chromo</span><span class="p">])</span> <span class="c1"># CHS[i]의 배열의 앞 47개는 MS이고 뒤 47개는 OS이기에 split</span>
+        <span class="n">OS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">CHS</span><span class="p">[</span><span class="n">Len_Chromo</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Len_Chromo</span><span class="p">])</span> <span class="c1"># MS의 값을 업데이트</span>
+        <span class="n">Needed_Matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Order_Matrix</span><span class="p">(</span><span class="n">MS</span><span class="p">)</span>
+        <span class="n">JM</span> <span class="o">=</span> <span class="n">Needed_Matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># Needed_Matrix 중 T는 지금은 필요하지 않으므로 우선 JM만 사용</span>
+
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">OS</span><span class="p">:</span> <span class="c1"># OS:  job Operation의 순서</span>
+            
+            <span class="n">Job</span> <span class="o">=</span> <span class="n">i</span> <span class="c1"># 현재 job#, int</span>
+            <span class="n">O_num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Jobs</span><span class="p">[</span><span class="n">Job</span><span class="p">]</span><span class="o">.</span><span class="n">Current_Processed</span><span class="p">()</span>  <span class="c1"># 현재 job의 현재 진행중인 operation 번호</span>
+            <span class="n">Machine</span> <span class="o">=</span> <span class="n">JM</span><span class="p">[</span><span class="n">Job</span><span class="p">][</span><span class="n">O_num</span><span class="p">]</span>  <span class="c1"># 해당 공정에 할당된 기계</span>
+            <span class="n">Para</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Earliest_Start</span><span class="p">(</span><span class="n">Job</span><span class="p">,</span> <span class="n">O_num</span><span class="p">,</span> <span class="n">Machine</span><span class="p">)</span> <span class="c1"># 해당 machine애서 해당 Job이 가장 빨리 진행될 수 있는 곳에 추가</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Para[0]: M_Ealiest, 해당 기계에서 가장 빨리 수행할 수 있는 시간</span>
+<span class="sd">                Para[1]: Selected_Machine, 선택된 기계</span>
+<span class="sd">                Para[2]: P_t, 공정 수행 시간</span>
+<span class="sd">                Para[3]: O_num, 해당 공정의 번호</span>
+<span class="sd">                Para[4]: last_O_end, 해당 기계(machine)의 공정(operation)을 삽입하기 전의 종료 시각</span>
+<span class="sd">                Para[5]: End_work_time, 해당 기계(machine)에 공정(operation)을 삽입한 뒤의 종료시각</span>
+<span class="sd">                가장 빨리 해당 operation이 시작할 수 있는 시각, 해당 machine이 종료되는 시각, 해당 machine</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="n">start_end_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Jobs</span><span class="p">[</span><span class="n">Job</span><span class="p">]</span><span class="o">.</span><span class="n">_Input</span><span class="p">(</span><span class="n">Para</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Para</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">Para</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># Job에서 해당 operation 수행, job constrain과 겹치지 않으면 동일한 값이 리턴된다</span>
+            <span class="k">if</span> <span class="n">start_end_time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Para</span><span class="p">[</span><span class="mi">5</span><span class="p">]:</span> <span class="c1"># 해당 operation 할당이 job contrain과 겹칠 경우, End_time이 변경되므로</span>
+                <span class="n">Para</span> <span class="o">=</span> <span class="p">(</span><span class="n">start_end_time</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span><span class="o">+</span><span class="n">Para</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span><span class="o">+</span><span class="p">(</span><span class="n">start_end_time</span><span class="p">[</span><span class="mi">1</span><span class="p">],)</span> <span class="c1"># job constrain에 의해 M_Ealiest, End_work_time, P_t가 변경됨</span>
+            <span class="k">if</span> <span class="n">Para</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span><span class="p">:</span> <span class="c1"># End_work_time이 현재의 makespan보다 크면 makespan 업데이트</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span> <span class="o">=</span> <span class="n">Para</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">Machines</span><span class="p">[</span><span class="n">Machine</span><span class="p">]</span><span class="o">.</span><span class="n">_Input</span><span class="p">(</span><span class="n">Job</span><span class="p">,</span> <span class="n">Para</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Para</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">Para</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>  <span class="c1"># Machine에서 해당 operation 수행</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitness</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Sohyun.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

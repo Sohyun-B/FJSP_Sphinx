@@ -1,0 +1,338 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Encode &mdash; FJSP 1.0.0 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5a0dd2f0"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=b5f768d8"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FJSP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FJSP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">모듈 코드</a></li>
+      <li class="breadcrumb-item active">Encode</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Encode의 소스 코드</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="Encode">
+<a class="viewcode-back" href="../source/Encode.html#Encode.Encode">[문서]</a>
+<span class="k">class</span> <span class="nc">Encode</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Encode 클래스는 작업(Job)과 기계(Machine)의 초기화 및 배치 알고리즘을 구현하는 클래스</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        Matrix (list): 기계 가공 시간 행렬.</span>
+<span class="sd">        J (dict): 각 작업에 해당하는 공정 수.</span>
+<span class="sd">        J_num (int): 작업 수.</span>
+<span class="sd">        M_num (int): 기계 수.</span>
+<span class="sd">        CHS (list): 염색체 리스트.</span>
+<span class="sd">        GS_num (int): 전역 선택 개체군 크기.</span>
+<span class="sd">        LS_num (int): 국부 선택 개체군 크기.</span>
+<span class="sd">        RS_num (int): 랜덤 선택 개체군 크기.</span>
+<span class="sd">        Len_Chromo (int): 염색체의 길이.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Matrix</span><span class="p">,</span> <span class="n">Pop_size</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">J_num</span><span class="p">,</span> <span class="n">M_num</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encode 클래스의 초기화 메서드</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            Matrix (list): 기계 가공 시간 행렬.</span>
+<span class="sd">            Pop_size (int): 개체군 크기.</span>
+<span class="sd">            J (dict): 각 job에 해당하는 operation 수.</span>
+<span class="sd">                    ex) {1: 5, 2:5, 3:5, ...} Job1의 공정(operation)의 수 5개</span>
+<span class="sd">            J_num (int): job 수.</span>
+<span class="sd">            M_num (int): machine 수</span>
+<span class="sd">            CHS (list): 염색체</span>
+<span class="sd">            GS_num (int): 한 세대(Generation)에서 전역 초기화된 염색체의 수</span>
+<span class="sd">            LS_num (int): 한 세대(Generation)에서 국부 초기화된 염색체의 수</span>
+<span class="sd">            RS_num (int): 한 세대(Generation)에서 랜덤 초기화된 염색체의 수</span>
+<span class="sd">            Len_Chrome (int): 하나의 염색체를 구성하는 유전자의 수</span>
+<span class="sd">        Note:</span>
+<span class="sd">            엄밀하게 말하면 유전자의 수는 len(CHS[i]). 그러나 CHS[i]가 MS+OS로 구성되어있어서 실제로는 그 절단이라고 볼 수도 있음</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Matrix</span> <span class="o">=</span> <span class="n">Matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">J</span> <span class="o">=</span> <span class="n">J</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">J_num</span> <span class="o">=</span> <span class="n">J_num</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">M_num</span> <span class="o">=</span> <span class="n">M_num</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">CHS</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">GS_num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.6</span> <span class="o">*</span> <span class="n">Pop_size</span><span class="p">)</span>  <span class="c1"># 전역 선택 초기화</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LS_num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.2</span> <span class="o">*</span> <span class="n">Pop_size</span><span class="p">)</span>  <span class="c1"># 국부 선택 초기화</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RS_num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">0.2</span> <span class="o">*</span> <span class="n">Pop_size</span><span class="p">)</span>  <span class="c1"># 랜덤 선택 초기화</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Len_Chromo</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">J</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Len_Chromo</span> <span class="o">+=</span> <span class="n">i</span>
+
+<div class="viewcode-block" id="Encode.OS_List">
+<a class="viewcode-back" href="../source/Encode.html#Encode.Encode.OS_List">[문서]</a>
+    <span class="k">def</span> <span class="nf">OS_List</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        각 작업(Job)의 공정(operation) 순서를 생성하는 함수</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            list: 작업 순서 리스트</span>
+<span class="sd">        Example:</span>
+<span class="sd">            J == {1:5, 2:5, 3:5, 4:8, 5:8, 6:8, 7:8}일때,</span>
+<span class="sd">            </span>
+<span class="sd">            OS_list = [ 0, 0, 0, ... 6, 6]</span>
+<span class="sd">            - 0(job1)은 5번(operation) 등장</span>
+<span class="sd">            - 1(job2)은 5번(operation) 등장</span>
+<span class="sd">            - 6(job7)은 8번(operation) 등장</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">OS_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">J</span><span class="o">.</span><span class="n">items</span><span class="p">():</span> <span class="c1"># {1:5, 2:5, 3:5, 4:8, 5:8, 6:8, 7:8}</span>
+            <span class="n">OS_add</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">v</span><span class="p">)]</span>
+            <span class="n">OS_list</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">OS_add</span><span class="p">)</span> <span class="c1"># len(OS_list) = 5*3 + 8*4</span>
+        <span class="k">return</span> <span class="n">OS_list</span></div>
+
+
+    <span class="c1"># 초기화 행렬 생성</span>
+<div class="viewcode-block" id="Encode.CHS_Matrix">
+<a class="viewcode-back" href="../source/Encode.html#Encode.Encode.CHS_Matrix">[문서]</a>
+    <span class="k">def</span> <span class="nf">CHS_Matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">C_num</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        C_num x Len_Chrome 크기의 영행렬 영행렬을 초기화 행렬으로 생성하는 함수</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">             C_num (int): 생성할 행렬의 행 개수</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            numpy.ndarray: C_num x Len_Chrome 크기의 영행렬</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">C_num</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Len_Chromo</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Encode.Site">
+<a class="viewcode-back" href="../source/Encode.html#Encode.Encode.Site">[문서]</a>
+    <span class="k">def</span> <span class="nf">Site</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Job</span><span class="p">,</span> <span class="n">Operation</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        (Job,Operation)으로 정렬 되어있을 때, 특정 작업(Job)의 특정 공정(Operation)의 순서 반환</span>
+<span class="sd">        Args: </span>
+<span class="sd">            Job (int): 작업(job) 번호</span>
+<span class="sd">            Operation (int): 공정(operation) 번호</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: O_num 작업과 공정에 해당하는 위치값</span>
+<span class="sd">        Example:</span>
+<span class="sd">            &gt;&gt;&gt;encode.Site(1, 2)</span>
+<span class="sd">            7</span>
+<span class="sd">            # Job2의 2번째 공정(Operation)은 Job1의 5개의 공정 + Job2의 첫번째 공정 다음 -&gt; 7번째 순서</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">O_num</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">J</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">Job</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">O_num</span> <span class="o">+</span> <span class="n">Operation</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">O_num</span> <span class="o">=</span> <span class="n">O_num</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">J</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">O_num</span></div>
+
+
+    <span class="c1"># 전역 초기화</span>
+<div class="viewcode-block" id="Encode.Global_initial">
+<a class="viewcode-back" href="../source/Encode.html#Encode.Encode.Global_initial">[문서]</a>
+    <span class="k">def</span> <span class="nf">Global_initial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            유전자를 전역 초기화 방식으로 초기화하는 함수</span>
+<span class="sd">            Returns: </span>
+<span class="sd">                numpy.ndarray:  CHS1, GS_num x (Len_Chrome*2)의 전역 초기화된 염색체 행렬</span>
+<span class="sd">            Note:</span>
+<span class="sd">                CHS1[i]는 MS(CHS1[i][:47])와 OS(CHS1[i][47:])로 구성            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">MS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHS_Matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GS_num</span><span class="p">)</span>  <span class="c1"># GS_num에 따라 개체군 생성 [240, 5*3 + 8*4]의 0행렬 생성</span>
+        <span class="n">OS_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OS_List</span><span class="p">()</span> <span class="c1"># 각 operation 수 만큼 job#-1로 초기화된 배열</span>
+        <span class="n">OS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHS_Matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GS_num</span><span class="p">)</span> <span class="c1"># GS_num에 따라 개체군 생성 [240, 5*3 + 8*4]의 0행렬 생성</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GS_num</span><span class="p">):</span>
+            <span class="n">Machine_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">M_num</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># 단계 1: 정수 배열 생성 (길이는 기계 수이며 모든 요소를 0으로 초기화)</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">OS_list</span><span class="p">)</span>  <span class="c1"># 공정 순서 부분 생성</span>
+            <span class="n">OS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">OS_list</span><span class="p">)</span>  <span class="c1"># 랜덤 섞은 후 이를 OS의 특정 행에 할당 (개체군이 있으므로 i번째는 OS의 i번째 행에 할당하여 완전한 OS 생성)</span>
+            <span class="n">GJ_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">i_1</span> <span class="k">for</span> <span class="n">i_1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">J_num</span><span class="p">)]</span>  <span class="c1"># 작업 집합 생성</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">GJ_list</span><span class="p">)</span>  <span class="c1"># 작업 집합을 랜덤으로 섞음 (다음 단계에서 첫 번째 작업을 랜덤으로 추출하기 위해)</span>
+            <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">GJ_list</span><span class="p">:</span>  <span class="c1"># 첫 번째 작업 선택 (앞 단계에서 작업 집합을 섞었으므로 첫 번째 추출도 &quot;랜덤&quot;)</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Matrix</span><span class="p">[</span><span class="n">g</span><span class="p">]</span>  <span class="c1"># h는 첫 번째 작업에 포함된 공정의 시간 행렬</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)):</span>  <span class="c1"># 이 작업의 첫 번째 공정부터 시작</span>
+                    <span class="n">D</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>  <span class="c1"># D는 첫 번째 작업의 첫 번째 공정에 해당하는 시간 행렬</span>
+                    <span class="n">List_Machine_weizhi</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">)):</span>  <span class="c1"># 공정을 처리할 수 있는 기계가 몇 번째 위치에 있는지 확인</span>
+                        <span class="n">Useing_Machine</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">Useing_Machine</span> <span class="o">!=</span> <span class="mi">9999</span><span class="p">:</span>
+                            <span class="n">List_Machine_weizhi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                    <span class="n">Machine_Select</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">Machine_add</span> <span class="ow">in</span> <span class="n">List_Machine_weizhi</span><span class="p">:</span>  <span class="c1"># 기계 시간 배열의 해당 위치와 공정을 처리할 수 있는 기계의 시간을 더함</span>
+                        <span class="n">Machine_Select</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Machine_time</span><span class="p">[</span><span class="n">Machine_add</span><span class="p">]</span> <span class="o">+</span> <span class="n">D</span><span class="p">[</span><span class="n">Machine_add</span><span class="p">])</span>
+                    <span class="n">Min_time</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">Machine_Select</span><span class="p">)</span>  <span class="c1"># 최소 시간을 가진 기계를 선택</span>
+                    <span class="n">K</span> <span class="o">=</span> <span class="n">Machine_Select</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">Min_time</span><span class="p">)</span>  <span class="c1"># 최소 시간이 처음 나타난 위치를 찾아 최소 부하가 걸린 기계를 확인 (공정을 처리할 수 있는 기계 중 K번째 기계)</span>
+                    <span class="n">I</span> <span class="o">=</span> <span class="n">List_Machine_weizhi</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>  <span class="c1"># 전체 기계 중 I번째 기계 (즉 Mi)</span>
+                    <span class="n">Machine_time</span><span class="p">[</span><span class="n">I</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Min_time</span>  <span class="c1"># 해당 기계 위치에 최소 시간을 더함</span>
+                    <span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Site</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>  <span class="c1"># 각 작업의 각 공정 위치를 찾음</span>
+                    <span class="n">MS</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">site</span><span class="p">]</span> <span class="o">=</span> <span class="n">K</span>  <span class="c1"># 각 공정에서 선택된 K번째 기계를 각 작업의 각 공정 위치에 할당 (MS 염색체 생성)</span>
+        <span class="n">CHS1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS</span><span class="p">,</span> <span class="n">OS</span><span class="p">))</span>  <span class="c1"># MS와 OS를 하나의 행렬로 통합</span>
+        <span class="k">return</span> <span class="n">CHS1</span></div>
+
+
+    <span class="c1"># 국부 초기화</span>
+<div class="viewcode-block" id="Encode.Local_initial">
+<a class="viewcode-back" href="../source/Encode.html#Encode.Encode.Local_initial">[문서]</a>
+    <span class="k">def</span> <span class="nf">Local_initial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            유전자를 로컬 초기화 방식으로 초기화하는 함수</span>
+<span class="sd">            Returns: </span>
+<span class="sd">                numpy.ndarray:  CHS2, LS_num x (Len_Chrome*2)의 전역 초기화된 염색체 행렬</span>
+<span class="sd">            Note:</span>
+<span class="sd">                CHS2[i]는 MS(CHS2[i][:47])와 OS(CHS2[i][47:])로 구성</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">MS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHS_Matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LS_num</span><span class="p">)</span>  <span class="c1"># LS_num에 따라 국부 선택 개체군 크기 생성</span>
+        <span class="n">OS_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OS_List</span><span class="p">()</span>
+        <span class="n">OS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHS_Matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LS_num</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LS_num</span><span class="p">):</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">OS_list</span><span class="p">)</span>  <span class="c1"># 공정 순서 부분 생성</span>
+            <span class="n">OS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">OS_list</span><span class="p">)</span>  <span class="c1"># 랜덤 섞은 후 이를 OS의 특정 행에 할당 (개체군이 있으므로 i번째는 OS의 i번째 행에 할당하여 완전한 OS 생성)</span>
+            <span class="n">GJ_List</span> <span class="o">=</span> <span class="p">[</span><span class="n">i_1</span> <span class="k">for</span> <span class="n">i_1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">J_num</span><span class="p">)]</span>  <span class="c1"># 작업 집합 생성</span>
+            <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">GJ_List</span><span class="p">:</span>  <span class="c1"># 첫 번째 작업 선택 (주의: 랜덤 섞기가 필요 없음)</span>
+                <span class="n">Machine_time</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">M_num</span><span class="p">,</span>
+                                        <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>  <span class="c1"># 정수 배열 설정 및 모든 요소를 초기화 (국부 초기화에서는 각 작업의 모든 공정을 완료한 후 다시 초기화해야 하므로 전역 초기화와 다름. 따라서 이 단계는 여기 있어야 함)</span>
+                <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Matrix</span><span class="p">[</span><span class="n">g</span><span class="p">]</span>  <span class="c1"># h는 첫 번째 작업에 포함된 공정의 시간 행렬</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)):</span>  <span class="c1"># 선택된 작업의 첫 번째 공정부터 시작</span>
+                    <span class="n">D</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>  <span class="c1"># 이 작업의 첫 번째 공정을 처리할 수 있는 기계 가공 시간 행렬</span>
+                    <span class="n">List_Machine_weizhi</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">)):</span>  <span class="c1"># 공정을 처리할 수 있는 기계가 몇 번째 위치에 있는지 확인</span>
+                        <span class="n">Useing_Machine</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">Useing_Machine</span> <span class="o">!=</span> <span class="mi">9999</span><span class="p">:</span>
+                            <span class="n">List_Machine_weizhi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                    <span class="n">Machine_Select</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">Machine_add</span> <span class="ow">in</span> <span class="n">List_Machine_weizhi</span><span class="p">:</span>  <span class="c1"># 기계 시간 배열의 해당 위치와 공정을 처리할 수 있는 기계의 시간을 더함</span>
+                        <span class="n">Machine_Select</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Machine_time</span><span class="p">[</span><span class="n">Machine_add</span><span class="p">]</span> <span class="o">+</span> <span class="n">D</span><span class="p">[</span><span class="n">Machine_add</span><span class="p">])</span>
+                    <span class="n">Min_time</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">Machine_Select</span><span class="p">)</span>  <span class="c1"># 최소 시간을 선택함</span>
+                    <span class="n">K</span> <span class="o">=</span> <span class="n">Machine_Select</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">Min_time</span><span class="p">)</span>  <span class="c1"># 최소 시간이 처음 나타난 위치를 찾아 최소 부하가 걸린 기계를 확인 (공정을 처리할 수 있는 기계 중 K번째 기계)</span>
+                    <span class="n">I</span> <span class="o">=</span> <span class="n">List_Machine_weizhi</span><span class="p">[</span><span class="n">K</span><span class="p">]</span>  <span class="c1"># 전체 기계 중 I번째 기계 (즉 Mi)</span>
+                    <span class="n">Machine_time</span><span class="p">[</span><span class="n">I</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Min_time</span>
+                    <span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Site</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>  <span class="c1"># 각 작업의 각 공정 위치를 찾음</span>
+                    <span class="n">MS</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">site</span><span class="p">]</span> <span class="o">=</span> <span class="n">K</span>  <span class="c1"># 각 공정에서 선택된 K번째 기계를 각 작업의 각 공정 위치에 할당함.</span>
+        <span class="n">CHS1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS</span><span class="p">,</span> <span class="n">OS</span><span class="p">))</span>  <span class="c1"># MS와 OS를 하나의 행렬로 통합함.</span>
+        <span class="k">return</span> <span class="n">CHS1</span></div>
+
+
+    <span class="c1"># 랜덤 초기화 </span>
+<div class="viewcode-block" id="Encode.Random_initial">
+<a class="viewcode-back" href="../source/Encode.html#Encode.Encode.Random_initial">[문서]</a>
+    <span class="k">def</span> <span class="nf">Random_initial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            유전자를 랜덤 초기화 방식으로 초기화하는 함수</span>
+<span class="sd">            Returns: </span>
+<span class="sd">                numpy.ndarray:  CHS2, RS_num x (Len_Chrome*2)의 전역 초기화된 염색체 행렬</span>
+<span class="sd">            Note:</span>
+<span class="sd">                CHS1[i]는 MS(CHS1[i][:47])와 OS(CHS1[i][47:])로 구성</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">MS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHS_Matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RS_num</span><span class="p">)</span>  <span class="c1"># RS_num에 따라 랜덤 선택 개체군 크기 생성 </span>
+        <span class="n">OS_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OS_List</span><span class="p">()</span>
+        <span class="n">OS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">CHS_Matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RS_num</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RS_num</span><span class="p">):</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">OS_list</span><span class="p">)</span>
+            <span class="n">OS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">OS_list</span><span class="p">)</span>
+            <span class="n">GJ_List</span> <span class="o">=</span> <span class="p">[</span><span class="n">i_1</span> <span class="k">for</span> <span class="n">i_1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">J_num</span><span class="p">)]</span>  <span class="c1"># 작업 집합 생성 </span>
+            <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">GJ_List</span><span class="p">:</span>  <span class="c1"># 첫 번째 작업 선택 </span>
+                <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Matrix</span><span class="p">[</span><span class="n">g</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">h</span><span class="p">)):</span>  <span class="c1"># 첫 번째 작업의 첫 번째 공정 선택 </span>
+                    <span class="n">D</span> <span class="o">=</span> <span class="n">h</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>  <span class="c1"># 이 작업의 첫 번째 공정을 처리할 수 있는 기계 가공 시간 행렬 </span>
+                    <span class="n">List_Machine_weizhi</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">)):</span>
+                        <span class="n">Useing_Machine</span> <span class="o">=</span> <span class="n">D</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">Useing_Machine</span> <span class="o">!=</span> <span class="mi">9999</span><span class="p">:</span>
+                            <span class="n">List_Machine_weizhi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                    <span class="n">number</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">List_Machine_weizhi</span><span class="p">)</span>  <span class="c1"># 선택 가능한 기계 번호 중 하나를 랜덤으로 선택 (이 번호는 바로 기계 번호임)</span>
+                    <span class="n">K</span> <span class="o">=</span> <span class="n">List_Machine_weizhi</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>  <span class="c1"># 즉, 이 공정을 처리할 수 있는 기계 중 K번째 기계를 의미하며 Mk는 아님.</span>
+                    <span class="n">site</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Site</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>  <span class="c1"># 각 작업의 각 공정 위치를 찾음 </span>
+                    <span class="n">MS</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">site</span><span class="p">]</span> <span class="o">=</span> <span class="n">K</span>  
+        <span class="n">CHS1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS</span><span class="p">,</span> <span class="n">OS</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">CHS1</span></div>
+</div>
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Sohyun.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

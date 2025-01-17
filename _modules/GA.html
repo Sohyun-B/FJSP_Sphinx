@@ -1,0 +1,414 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GA &mdash; FJSP 1.0.0 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5a0dd2f0"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=b5f768d8"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FJSP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FJSP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">모듈 코드</a></li>
+      <li class="breadcrumb-item active">GA</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>GA의 소스 코드</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">Decode</span> <span class="kn">import</span> <span class="n">Decode</span>
+<span class="kn">from</span> <span class="nn">Instance</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="GA">
+<a class="viewcode-back" href="../source/GA.html#GA.GA">[문서]</a>
+<span class="k">class</span> <span class="nc">GA</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    유전자 알고리즘을 구현하는 클래스</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        Pop_size (int): 세대(Generation)를 이루는 염색체의 수</span>
+<span class="sd">        Pc (float): 교치 확률</span>
+<span class="sd">        Pm (float): 변이 확률</span>
+<span class="sd">        Pv (float): 어떤 방식으로 교차를 수행할지 선택하는 확률 임계값</span>
+<span class="sd">        Pw (float): 어떤 방식으로 변이를 수행할지 선택하는 확률 임계값</span>
+<span class="sd">        Max_Iteration (int): 최대 반복 횟수</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        GA 클래스의 초기화 매서드</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">Pop_size</span> <span class="o">=</span> <span class="mi">400</span>  <span class="c1"># 개체군 크기</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Pc</span> <span class="o">=</span> <span class="mf">0.8</span>  <span class="c1"># 교차 확률</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Pm</span> <span class="o">=</span> <span class="mf">0.3</span>  <span class="c1"># 변이 확률</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Pv</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># 어떤 방식으로 교차를 수행할지 선택하는 확률 임계값</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Pw</span> <span class="o">=</span> <span class="mf">0.95</span>  <span class="c1"># 어떤 방식으로 변이를 수행할지 선택하는 확률 임계값</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Max_Iterations</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># 최대 반복 횟수</span>
+
+    <span class="c1"># 적합도 계산</span>
+<div class="viewcode-block" id="GA.cost">
+<a class="viewcode-back" href="../source/GA.html#GA.GA.cost">[문서]</a>
+    <span class="k">def</span> <span class="nf">cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CHS</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">Processing_time</span><span class="p">,</span> <span class="n">M_num</span><span class="p">,</span> <span class="n">Len</span><span class="p">,</span> <span class="n">Job_constrains</span><span class="p">,</span> <span class="n">Machine_constrains</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        한 세대의 적합도(Cost)를 계산하는 매서드. </span>
+
+<span class="sd">        Args: </span>
+<span class="sd">            CHS (list): 염색체 리스트</span>
+<span class="sd">            J (dict): 각 작업(job)의 공정(operation) 수를 나타내는 딕셔너리</span>
+<span class="sd">            Processing_time (list): 각 작업(job)과 공정(operaiton)의 처리 시간 행렬</span>
+<span class="sd">            M_num (int): 총 기계(machine)의 수</span>
+<span class="sd">            Len (int): (= O_num) 총 공정(operation)의 수</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: 한 세대의 염색체들의 적합도(Cost) 리스트. 여기서 적합도는 makespan</span>
+
+<span class="sd">        Note:    </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Cost</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">CHS</span><span class="p">)):</span> <span class="c1"># 각 염색체의 수만큼 반복 </span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">Decode</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="n">Processing_time</span><span class="p">,</span> <span class="n">M_num</span><span class="p">,</span> <span class="n">Job_constrains</span><span class="p">,</span> <span class="n">Machine_constrains</span><span class="p">)</span> 
+            <span class="n">Cost</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">CHS</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Len</span><span class="p">))</span> <span class="c1">#Cost의 리스트</span>
+        <span class="k">return</span> <span class="n">Cost</span></div>
+
+
+
+<div class="viewcode-block" id="GA.avail_machine_count">
+<a class="viewcode-back" href="../source/GA.html#GA.GA.avail_machine_count">[문서]</a>
+    <span class="k">def</span> <span class="nf">avail_machine_count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Processing_time</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        각 작업(job)의 공정(operation)에 대해 사용 가능한 기계 수(MS 값이 가질 수 있는 최대)를 리턴</span>
+<span class="sd">        avail_machine_count[i][j]==k: i번째 job의 j번째 공정은 총 k개의 기계(machine)에서 작동시킬 수 있다.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">avail_machine</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Processing_time</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Processing_time</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span> 
+                <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Processing_time</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+                    <span class="k">if</span> <span class="n">Processing_time</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">9999</span><span class="p">:</span>
+                        <span class="n">count</span><span class="o">+=</span><span class="mi">1</span>
+                <span class="n">avail_machine</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">avail_machine</span></div>
+
+
+    <span class="c1"># 기계 부분 교차</span>
+<div class="viewcode-block" id="GA.machine_cross">
+<a class="viewcode-back" href="../source/GA.html#GA.GA.machine_cross">[문서]</a>
+    <span class="k">def</span> <span class="nf">machine_cross</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CHS1</span><span class="p">,</span> <span class="n">CHS2</span><span class="p">,</span> <span class="n">T0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        기계 선택의 교차 수행하는 매서드. 유전자의 MS 부분 uniform crossover로 교차. </span>
+<span class="sd">        Args:</span>
+<span class="sd">            CHS1 (numpy.ndarray): 기계 교차에 선택된 유전자 1</span>
+<span class="sd">            CHS2 (numpy.ndarray): 기계 교차에 선택된 유전자 2</span>
+<span class="sd">            T0 (int): 총 공정(operation) 수, 교차로 선택될 기계 유전자 배열의 길이 (O_num)</span>
+<span class="sd">        Returns: </span>
+<span class="sd">            tuple: 기계 교차가 된 두개의 유전자 배열</span>
+<span class="sd">        </span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">T_r</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T0</span><span class="p">)]</span> <span class="c1"># 총 공정 수 만큼 0 ~ (t0-1)까지 숫자 리스트 생성</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>  <span class="c1"># [1,10] 구간에서 정수 r을 생성</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">T_r</span><span class="p">)</span> <span class="c1">#  T_r 리스트를 무작위 셔플</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">T_r</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">r</span><span class="p">]</span>  <span class="c1"># 랜덤 숫자 r의 길이인 랜덤 셔플된 리스트의 일부 R 생성 </span>
+        <span class="n">OS_1</span> <span class="o">=</span> <span class="n">CHS1</span><span class="p">[</span><span class="n">O_num</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">T0</span><span class="p">]</span>
+        <span class="n">OS_2</span> <span class="o">=</span> <span class="n">CHS2</span><span class="p">[</span><span class="n">O_num</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">T0</span><span class="p">]</span>
+        <span class="n">MS_1</span> <span class="o">=</span> <span class="n">CHS2</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">T0</span><span class="p">]</span>
+        <span class="n">MS_2</span> <span class="o">=</span> <span class="n">CHS1</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">T0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">R</span><span class="p">:</span>
+            <span class="n">K</span><span class="p">,</span> <span class="n">K_2</span> <span class="o">=</span> <span class="n">MS_1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">MS_2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">MS_1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">MS_2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">K_2</span><span class="p">,</span> <span class="n">K</span>
+        <span class="n">CHS1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS_1</span><span class="p">,</span> <span class="n">OS_1</span><span class="p">))</span>
+        <span class="n">CHS2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS_2</span><span class="p">,</span> <span class="n">OS_2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">CHS1</span><span class="p">,</span> <span class="n">CHS2</span></div>
+
+
+<div class="viewcode-block" id="GA.operation_cross">
+<a class="viewcode-back" href="../source/GA.html#GA.GA.operation_cross">[문서]</a>
+    <span class="k">def</span> <span class="nf">operation_cross</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CHS1</span><span class="p">,</span> <span class="n">CHS2</span><span class="p">,</span> <span class="n">T0</span><span class="p">,</span> <span class="n">J_num</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        공정 선택의 교차 수행하는 매서드. 유전자의 OS 부분 교차.</span>
+<span class="sd">        CHS의 변수값이 Set1에 포함되면 순서 유지, Set1에 없으면 CHS2의 순서에 따라 매핑</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            CHS1 (numpy.ndarray): 공정 교차에 선택된 유전자 1</span>
+<span class="sd">            CHS2 (numpy.ndarray): 공정 교차에 선택된 유전자 2</span>
+<span class="sd">            T0 (int): 총 공정(operation) 수, 교차로 선택될 공정 유전자 배열의 길이</span>
+<span class="sd">            J_num (int): 총 기계(machine) 수</span>
+
+<span class="sd">        Returns: </span>
+<span class="sd">            tuple: 공정 교차가 된 두개의 유전자 배열</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">OS_1</span> <span class="o">=</span> <span class="n">CHS1</span><span class="p">[</span><span class="n">T0</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">T0</span><span class="p">]</span>
+        <span class="n">OS_2</span> <span class="o">=</span> <span class="n">CHS2</span><span class="p">[</span><span class="n">T0</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">T0</span><span class="p">]</span>
+        <span class="n">MS_1</span> <span class="o">=</span> <span class="n">CHS1</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">T0</span><span class="p">]</span>
+        <span class="n">MS_2</span> <span class="o">=</span> <span class="n">CHS2</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">T0</span><span class="p">]</span>
+        <span class="n">Job_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J_num</span><span class="p">)]</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">Job_list</span><span class="p">)</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">J_num</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">Set1</span> <span class="o">=</span> <span class="n">Job_list</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">r</span><span class="p">]</span>
+        <span class="n">new_os</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">OS_1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">Set1</span><span class="p">:</span>
+                <span class="n">new_os</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">OS_2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Set1</span><span class="p">:</span>
+                <span class="n">Site</span> <span class="o">=</span> <span class="n">new_os</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">new_os</span><span class="p">[</span><span class="n">Site</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">new_os</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">new_os</span><span class="p">])</span>
+        <span class="n">CHS1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS_1</span><span class="p">,</span> <span class="n">new_os</span><span class="p">))</span>
+        <span class="n">CHS2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS_2</span><span class="p">,</span> <span class="n">new_os</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">CHS1</span><span class="p">,</span> <span class="n">CHS2</span></div>
+
+<div class="viewcode-block" id="GA.operation_cross2">
+<a class="viewcode-back" href="../source/GA.html#GA.GA.operation_cross2">[문서]</a>
+    <span class="k">def</span> <span class="nf">operation_cross2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CHS1</span><span class="p">,</span> <span class="n">CHS2</span><span class="p">,</span> <span class="n">T0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        position-based crossover</span>
+<span class="sd">        공정 선택의 교차 수행하는 매서드. 유전자의 OS 부분 교차.</span>
+<span class="sd">        -1이나 0으로 구성된 mask를 만들어서 mask의 인덱스의 값이 -1인 경우 OS_1의 값 사용, 0인 경우 OS_2의 값을 사용하여 crossover</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            CHS1 (numpy.ndarray): 공정 교차에 선택된 유전자 1</span>
+<span class="sd">            CHS2 (numpy.ndarray): 공정 교차에 선택된 유전자 2</span>
+<span class="sd">            T0 (int): 총 공정(operation) 수, 교차로 선택될 공정 유전자 배열의 길이</span>
+<span class="sd">            J_num (int): 총 기계(machine) 수</span>
+
+<span class="sd">        Returns: </span>
+<span class="sd">            tuple: 기계 부분은 기존과 동일하고, 공정 교차가 된 두개의 유전자 배열</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">OS_1</span> <span class="o">=</span> <span class="n">CHS1</span><span class="p">[</span><span class="n">T0</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">T0</span><span class="p">]</span>
+        <span class="n">OS_2</span> <span class="o">=</span> <span class="n">CHS2</span><span class="p">[</span><span class="n">T0</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">T0</span><span class="p">]</span>
+        <span class="n">MS_1</span> <span class="o">=</span> <span class="n">CHS1</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">T0</span><span class="p">]</span>
+        <span class="n">MS_2</span> <span class="o">=</span> <span class="n">CHS2</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">T0</span><span class="p">]</span>
+
+        <span class="c1"># 새로운 배열 초기화</span>
+        <span class="n">new_os</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">T0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
+
+        <span class="c1"># Step 2: 길이가 len(OS)이고 랜덤 숫자 r개의 값이 -1이고 나머지 값은 1인 crossover_index 배열 생성</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T0</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># 랜덤 r 값 선택</span>
+
+        <span class="c1"># crossover_index 생성 (r개의 1과 나머지 0)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">r</span> <span class="o">+</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">T0</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>  <span class="c1"># 순서 랜덤화</span>
+
+
+        <span class="c1"># mask가 0인 경우 CHS1의 순서를 유지</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">OS_1</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mask</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># mask가 0인 위치는 CHS1 값 유지</span>
+                <span class="n">new_os</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="c1"># mask가 -1인 경우 CHS2의 순서로 변경</span>
+        <span class="n">new_os_counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">new_os</span><span class="p">)</span>
+        <span class="n">OS_2_counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">OS_2</span><span class="p">)</span>
+        <span class="n">remaining_values</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">OS_2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">new_os_counter</span><span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">OS_2_counter</span><span class="p">[</span><span class="n">value</span><span class="p">]:</span>
+                <span class="n">remaining_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">new_os_counter</span><span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T0</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">new_os</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>  <span class="c1"># 값이 -1인 위치에만 채움</span>
+                <span class="n">new_os</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">remaining_values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">CHS1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS_1</span><span class="p">,</span> <span class="n">new_os</span><span class="p">))</span>
+        <span class="n">CHS2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS_2</span><span class="p">,</span> <span class="n">new_os</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">CHS1</span><span class="p">,</span> <span class="n">CHS2</span></div>
+
+    
+<div class="viewcode-block" id="GA.machine_variation2">
+<a class="viewcode-back" href="../source/GA.html#GA.GA.machine_variation2">[문서]</a>
+    <span class="k">def</span> <span class="nf">machine_variation2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CHS</span><span class="p">,</span> <span class="n">avail_machine</span><span class="p">,</span> <span class="n">T0</span><span class="p">):</span>
+        <span class="n">Tr</span> <span class="o">=</span> <span class="p">[</span><span class="n">i_num</span> <span class="k">for</span> <span class="n">i_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T0</span><span class="p">)]</span>
+        <span class="n">MS</span> <span class="o">=</span> <span class="n">CHS</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">T0</span><span class="p">]</span>
+        <span class="n">OS</span> <span class="o">=</span> <span class="n">CHS</span><span class="p">[</span><span class="n">T0</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">T0</span><span class="p">]</span>
+        <span class="c1"># 기계 선택 부분 변이 처리</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T0</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># 변이 염색체에서 r개의 위치를 선택함.</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">Tr</span><span class="p">)</span>
+        <span class="n">T_r</span> <span class="o">=</span> <span class="n">Tr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">r</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">T_r</span><span class="p">:</span>
+            <span class="n">MS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">avail_machine</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">CHS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS</span><span class="p">,</span> <span class="n">OS</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">CHS</span></div>
+
+    
+<div class="viewcode-block" id="GA.machine_variation">
+<a class="viewcode-back" href="../source/GA.html#GA.GA.machine_variation">[문서]</a>
+    <span class="k">def</span> <span class="nf">machine_variation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CHS</span><span class="p">,</span> <span class="n">Processing_time</span><span class="p">,</span> <span class="n">T0</span><span class="p">,</span> <span class="n">J</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        기계 변이의 변이 수행하는 매서드. 유전자의 MS 부분 변이.</span>
+<span class="sd">        </span>
+<span class="sd">        Args:</span>
+<span class="sd">            CHS (numpy.ndarray): 기계 변이에 선택된 유전자</span>
+<span class="sd">            Processing_time (list): 공정(operation) 시간 행렬인 3차원 리스트</span>
+<span class="sd">            T0 (int): 총 공정(operation) 수, 변이로 선택될 기계 유전자 배열의 길이</span>
+<span class="sd">            J (dict): 각 작업(job)의 공정(operation) 수를 나타내는 딕셔너리</span>
+<span class="sd">        Returns: </span>
+<span class="sd">            tuple: 기계 변이가 된 하나의 유전자 배열</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Tr</span> <span class="o">=</span> <span class="p">[</span><span class="n">i_num</span> <span class="k">for</span> <span class="n">i_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T0</span><span class="p">)]</span>
+        <span class="n">MS</span> <span class="o">=</span> <span class="n">CHS</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">T0</span><span class="p">]</span>
+        <span class="n">OS</span> <span class="o">=</span> <span class="n">CHS</span><span class="p">[</span><span class="n">T0</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">T0</span><span class="p">]</span>
+        <span class="c1"># 기계 선택 부분 변이 처리</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">T0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># 변이 염색체에서 r개의 위치를 선택함.</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">Tr</span><span class="p">)</span>
+        <span class="n">T_r</span> <span class="o">=</span> <span class="n">Tr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">r</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">T_r</span><span class="p">:</span>
+            <span class="n">T_0</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">T0</span><span class="p">)]</span>
+            <span class="n">K</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">Site</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">J</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">K</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">T_0</span><span class="p">[</span><span class="n">Site</span><span class="p">:</span><span class="n">Site</span> <span class="o">+</span> <span class="n">v</span><span class="p">])</span>
+                <span class="n">Site</span> <span class="o">+=</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">K</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">K</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">O_i</span> <span class="o">=</span> <span class="n">i</span>
+                    <span class="n">O_j</span> <span class="o">=</span> <span class="n">K</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="n">Machine_using</span> <span class="o">=</span> <span class="n">Processing_time</span><span class="p">[</span><span class="n">O_i</span><span class="p">][</span><span class="n">O_j</span><span class="p">]</span> <span class="c1"># [9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 32, 45, 14, 20]와 같은 operation의 이용 가능한 머신</span>
+            <span class="n">Machine_time</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># [ 32, 45, 14, 20]와 같이 사용 가능한 머신의 시간 사용량</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">Machine_using</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">j</span> <span class="o">!=</span> <span class="mi">9999</span><span class="p">:</span>
+                    <span class="n">Machine_time</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+            <span class="n">Min_index</span> <span class="o">=</span> <span class="n">Machine_time</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">Machine_time</span><span class="p">))</span> <span class="c1"># 가장 시간이 적게 걸리는 것의 인덱스</span>
+            <span class="n">MS</span><span class="p">[</span><span class="n">num</span><span class="p">]</span> <span class="o">=</span> <span class="n">Min_index</span>
+        <span class="n">CHS</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS</span><span class="p">,</span> <span class="n">OS</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">CHS</span></div>
+
+
+    <span class="c1"># 공정 부분 변이</span>
+<div class="viewcode-block" id="GA.operation_variation">
+<a class="viewcode-back" href="../source/GA.html#GA.GA.operation_variation">[문서]</a>
+    <span class="k">def</span> <span class="nf">operation_variation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CHS</span><span class="p">,</span> <span class="n">T0</span><span class="p">,</span> <span class="n">J_num</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">O</span><span class="p">,</span> <span class="n">M_num</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        공정 변이의 변이 수행하는 매서드. 유전자의 OS 부분 변이.</span>
+<span class="sd">        OS의 인덱스 job 인덱스 r개 추출하고 뽑힌 job들에 대해서 가능한 permutation 진행</span>
+<span class="sd">        Args:</span>
+<span class="sd">            CHS (numpy.ndarray): 공정 변이에 선택된 유전자</span>
+<span class="sd">            T0 (int): 총 공정(operation) 수, 변이로 선택될 기계 유전자 배열의 길이</span>
+<span class="sd">            J_num (int): 총 작업(job)의 수</span>
+<span class="sd">            J (dict): 각 작업(job)의 공정(operation)수를 나타내는 딕셔너리</span>
+<span class="sd">            O (list): 공정(operation) 시간 행렬</span>
+<span class="sd">            M_num (int): 총 기계(machine)의 수</span>
+<span class="sd">            </span>
+<span class="sd">        Returns: </span>
+<span class="sd">            tuple: 공정 변이가 된 하나의 유전자 배열</span>
+<span class="sd">            </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">MS</span> <span class="o">=</span> <span class="n">CHS</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">T0</span><span class="p">]</span>
+        <span class="n">OS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">CHS</span><span class="p">[</span><span class="n">T0</span><span class="p">:</span><span class="mi">2</span> <span class="o">*</span> <span class="n">T0</span><span class="p">])</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">J_num</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">Tr</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">J_num</span><span class="p">)]</span>
+        <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">Tr</span><span class="p">)</span>
+        <span class="n">Tr</span> <span class="o">=</span> <span class="n">Tr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">r</span><span class="p">]</span> <span class="c1"># r개의 랜덤 작업 인덱스 추출</span>
+        <span class="n">J_os</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">OS</span><span class="p">))</span>  
+        <span class="n">J_os</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">J_os</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1">#  J_os (OS였을때의 인덱스, os값)의 튜플을 가지는 리스트인데 os값으로 정렬됨</span>
+        <span class="n">Site</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">r</span><span class="p">):</span>
+            <span class="n">Site</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">OS</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">Tr</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">permutations</span><span class="p">(</span><span class="n">Tr</span><span class="p">,</span> <span class="n">r</span><span class="p">))</span>
+        <span class="n">A_CHS</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+                <span class="n">OS</span><span class="p">[</span><span class="n">Site</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span> <span class="o">=</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">C_I</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">MS</span><span class="p">,</span> <span class="n">OS</span><span class="p">))</span>
+            <span class="n">A_CHS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C_I</span><span class="p">)</span>
+        <span class="n">Fit</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A_CHS</span><span class="p">)):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">Decode</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="n">O</span><span class="p">,</span> <span class="n">M_num</span><span class="p">)</span>
+            <span class="n">Fit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">CHS</span><span class="p">,</span> <span class="n">T0</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">A_CHS</span><span class="p">[</span><span class="n">Fit</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">Fit</span><span class="p">))]</span>   </div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Sohyun.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ko" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>main &mdash; FJSP 1.0.0 문서</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5a0dd2f0"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=b5f768d8"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="색인" href="../genindex.html" />
+    <link rel="search" title="검색" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            FJSP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">FJSP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">모듈 코드</a></li>
+      <li class="breadcrumb-item active">main</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>main의 소스 코드</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">Decode</span> <span class="kn">import</span> <span class="n">Decode</span>
+<span class="kn">from</span> <span class="nn">Encode</span> <span class="kn">import</span> <span class="n">Encode</span>
+<span class="kn">from</span> <span class="nn">GA</span> <span class="kn">import</span> <span class="n">GA</span>
+<span class="kn">from</span> <span class="nn">Instance</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<div class="viewcode-block" id="Gantt">
+<a class="viewcode-back" href="../source/main.html#main.Gantt">[문서]</a>
+<span class="k">def</span> <span class="nf">Gantt</span><span class="p">(</span><span class="n">Machines</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Machine 클래스를 이용해서 간트 차트 생성 및 생성된 차트 이미지를 png 형태로 저장합니다.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;palegoldenrod&#39;</span><span class="p">,</span> <span class="s1">&#39;purple&#39;</span><span class="p">,</span> <span class="s1">&#39;pink&#39;</span><span class="p">,</span> <span class="s1">&#39;Thistle&#39;</span><span class="p">,</span> <span class="s1">&#39;Magenta&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;SlateBlue&#39;</span><span class="p">,</span> <span class="s1">&#39;RoyalBlue&#39;</span><span class="p">,</span> <span class="s1">&#39;Cyan&#39;</span><span class="p">,</span> <span class="s1">&#39;Aqua&#39;</span><span class="p">,</span> <span class="s1">&#39;floralwhite&#39;</span><span class="p">,</span> <span class="s1">&#39;ghostwhite&#39;</span><span class="p">,</span> <span class="s1">&#39;goldenrod&#39;</span><span class="p">,</span> <span class="s1">&#39;mediumslateblue&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;navajowhite&#39;</span><span class="p">,</span> <span class="s1">&#39;navy&#39;</span><span class="p">,</span> <span class="s1">&#39;sandybrown&#39;</span><span class="p">,</span> <span class="s1">&#39;moccasin&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Machines</span><span class="p">)):</span>
+        <span class="n">Machine</span> <span class="o">=</span> <span class="n">Machines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">Start_time</span> <span class="o">=</span> <span class="n">Machine</span><span class="o">.</span><span class="n">O_start</span>
+        <span class="n">End_time</span> <span class="o">=</span> <span class="n">Machine</span><span class="o">.</span><span class="n">O_end</span>
+        <span class="k">for</span> <span class="n">i_1</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">End_time</span><span class="p">)):</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">barh</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">End_time</span><span class="p">[</span><span class="n">i_1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Start_time</span><span class="p">[</span><span class="n">i_1</span><span class="p">],</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="n">Start_time</span><span class="p">[</span><span class="n">i_1</span><span class="p">],</span>
+                     <span class="n">color</span><span class="o">=</span><span class="n">M</span><span class="p">[</span><span class="n">Machine</span><span class="o">.</span><span class="n">assigned_task</span><span class="p">[</span><span class="n">i_1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">Start_time</span><span class="p">[</span><span class="n">i_1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">End_time</span><span class="p">[</span><span class="n">i_1</span><span class="p">]</span> <span class="o">-</span> <span class="n">Start_time</span><span class="p">[</span><span class="n">i_1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">i</span><span class="p">,</span>
+                     <span class="n">s</span><span class="o">=</span><span class="n">Machine</span><span class="o">.</span><span class="n">assigned_task</span><span class="p">[</span><span class="n">i_1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Machines</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Machines</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Scheduling Gantt chart&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Machines&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Time(min)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;Optimized_Scheduling_Gantt_Chart.png&#39;</span><span class="p">)</span>  <span class="c1"># Save the Gantt chart as an image file</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Gantt_Text">
+<a class="viewcode-back" href="../source/main.html#main.Gantt_Text">[문서]</a>
+<span class="k">def</span> <span class="nf">Gantt_Text</span><span class="p">(</span><span class="n">Machines</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    간트 차트 데이터를 텍스트로 출력합니다.</span>
+<span class="sd">    각 기계의 작업 스케줄(Job Index, Operation Index, 시작 시간 및 종료 시간)을 출력합니다.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;=== 간트 차트 스케줄 (텍스트 출력) ===&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">Machine</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Machines</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;기계 </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">)</span>  <span class="c1"># 기계 번호 출력</span>
+        <span class="k">for</span> <span class="n">task_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Machine</span><span class="o">.</span><span class="n">assigned_task</span><span class="p">)):</span>
+            <span class="n">job_index</span> <span class="o">=</span> <span class="n">Machine</span><span class="o">.</span><span class="n">assigned_task</span><span class="p">[</span><span class="n">task_index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># 작업(Job) 인덱스</span>
+            <span class="n">operation_index</span> <span class="o">=</span> <span class="n">Machine</span><span class="o">.</span><span class="n">assigned_task</span><span class="p">[</span><span class="n">task_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># 작업(Operation) 인덱스</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">Machine</span><span class="o">.</span><span class="n">O_start</span><span class="p">[</span><span class="n">task_index</span><span class="p">]</span>  <span class="c1"># 작업 시작 시간</span>
+            <span class="n">end_time</span> <span class="o">=</span> <span class="n">Machine</span><span class="o">.</span><span class="n">O_end</span><span class="p">[</span><span class="n">task_index</span><span class="p">]</span>  <span class="c1"># 작업 종료 시간</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  작업 </span><span class="si">{</span><span class="n">job_index</span><span class="si">}</span><span class="s2">, 작업 단계 </span><span class="si">{</span><span class="n">operation_index</span><span class="si">}</span><span class="s2">: 시작 시간 = </span><span class="si">{</span><span class="n">start_time</span><span class="si">}</span><span class="s2">, 종료 시간 = </span><span class="si">{</span><span class="n">end_time</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>  <span class="c1"># 기계 간 빈 줄 추가</span></div>
+
+
+<span class="c1"># Function: Costness</span>
+<div class="viewcode-block" id="fitness_function">
+<a class="viewcode-back" href="../source/main.html#main.fitness_function">[문서]</a>
+<span class="k">def</span> <span class="nf">fitness_function</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">population_size</span><span class="p">):</span> 
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    입력받은 cost(makespan)를 기반으로 각 유전자의 적합도(fitness)를 계산하고, 룰렛 휠 선택을 위한 누적 확률을 생성하는 함수.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cost (list): 한 세대의 염색체들의 cost(makespan) 리스트</span>
+<span class="sd">        population_size (int): 한 세대에서 총 염색체의 수</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        numpy.ndarray: fitness </span>
+<span class="sd">                        fitness[i][0]은 적합도(fitness) 점수 </span>
+<span class="sd">                        fitness[i][1]은 룰렛 휠 선택을 위한 누적 선택 확률</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; cost = [10, 20, 30]</span>
+<span class="sd">        &gt;&gt;&gt; population_size = 3</span>
+<span class="sd">        &gt;&gt;&gt; fitness = fitness_function(cost, population_size)</span>
+<span class="sd">        &gt;&gt;&gt; print(fitness)</span>
+<span class="sd">        # 첫번쨰 열: 정규회된 적합도 값</span>
+<span class="sd">        # 두번째 열: 누적 확률값, 룰렛 휠 선택 사용</span>
+<span class="sd">        [[0.5   0.5 ] </span>
+<span class="sd">        [0.333 0.833] </span>
+<span class="sd">        [0.25  1.   ]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># 적합도 계산 </span>
+    <span class="n">fitness</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">population_size</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span> <span class="c1"># 적합도 배열 초기화, fitness[0]: 각 개체의 적합도 저장, fitness[1]: 누적 확률 값 저장</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fitness</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span> <span class="c1"># 각 개체의 적합도 계산</span>
+        <span class="n">fitness</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">cost</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="c1"># 비용이 낮을 수록 높은 적합도 부여. 비용이 0일시 적합도는 1.</span>
+    
+    <span class="c1"># 정규화 및 누적 확률 계산</span>
+    <span class="n">fit_sum</span>      <span class="o">=</span> <span class="n">fitness</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">fitness</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">fitness</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">fitness</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">fitness</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">fitness</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">fitness</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    
+    <span class="c1"># 최종 정규화</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fitness</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">fitness</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">fitness</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">fit_sum</span>
+    <span class="k">return</span> <span class="n">fitness</span></div>
+
+
+<span class="c1"># Function: Selection</span>
+<div class="viewcode-block" id="roulette_wheel">
+<a class="viewcode-back" href="../source/main.html#main.roulette_wheel">[문서]</a>
+<span class="k">def</span> <span class="nf">roulette_wheel</span><span class="p">(</span><span class="n">fitness</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    유전 알고리즘의 룰렛 휠 선택 매커니즘을 구현한 함수</span>
+<span class="sd">    룰렛 휠 알고리즘: 각 개체의 적합도에 비례하여 부모를 선택하는 방식. 적합도가 높은 개체가 더 자주 선택될 확률을 가짐.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fitness (np.ndarray):  fitness[i][0]: 각 개체의 적합도, fitness[i][1]: 누적 확률 값</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        int: ix, 선택된 개체의 인덱스</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    <span class="n">ix</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 선택된 개체의 인덱스를 저장할 변수</span>
+
+    <span class="c1"># 0-1 사이의 난수 생성, os.urandom은 암호학적으로 안전한 난수 생성됨</span>
+    <span class="c1"># random의 값이 룰렛의 침이 가리키는 위치. random의 값이 자신의 구간 내에 있으면 선택된 것으로 간주함.</span>
+    <span class="n">random</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">urandom</span><span class="p">(</span><span class="mi">8</span><span class="p">),</span> <span class="n">byteorder</span> <span class="o">=</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">64</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> 
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fitness</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span> <span class="c1"># 개체군의 크기만큼 반복</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">random</span> <span class="o">&lt;=</span> <span class="n">fitness</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]):</span> <span class="c1"># 난수가 누적 확률 범위에 속하면</span>
+          <span class="n">ix</span> <span class="o">=</span> <span class="n">i</span> <span class="c1"># 해당 개체의 인덱스를 저장</span>
+          <span class="k">break</span> <span class="c1"># 반복 종료</span>
+    <span class="k">return</span> <span class="n">ix</span> <span class="c1"># 선택된 개체의 인덱스 반환</span></div>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> 
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="c1"># 1. 초기화</span>
+    <span class="n">Optimal_cost</span> <span class="o">=</span> <span class="mi">9999</span>  <span class="c1"># 최적 적합도 (초기화)</span>
+    <span class="n">Optimal_CHS</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># 최적 적합도에 해당하는 유전자 개체 (초기화)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">GA</span><span class="p">()</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">Encode</span><span class="p">(</span><span class="n">Processing_time</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">Pop_size</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">J_num</span><span class="p">,</span> <span class="n">M_num</span><span class="p">)</span>
+    <span class="n">CHS1</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">Global_initial</span><span class="p">()</span>
+    <span class="n">CHS2</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">Random_initial</span><span class="p">()</span>
+    <span class="n">CHS3</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">Local_initial</span><span class="p">()</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">CHS1</span><span class="p">,</span> <span class="n">CHS2</span><span class="p">,</span> <span class="n">CHS3</span><span class="p">))</span> <span class="c1"># 세가지 초기화 방식을 하나의 배열로 결합</span>
+    <span class="n">avail_machine</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">avail_machine_count</span><span class="p">(</span><span class="n">Processing_time</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;avail_machine&quot;</span><span class="p">,</span> <span class="n">avail_machine</span><span class="p">)</span>
+
+    <span class="n">Best_cost</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># 적합도가 반복 과정에서 변화하는 것을 기록하여 그래프를 그리기 위함</span>
+
+    <span class="n">fortherecord_whichischosen</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># crossover시 자식 유전자를 얼마나 선택했는지 기록용. 삭제 가능</span>
+    <span class="c1"># 2. makespan 계산 반복 </span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">Max_Iterations</span><span class="p">):</span> 
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;iter_</span><span class="si">{}</span><span class="s2"> start!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="n">Cost</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">Processing_time</span><span class="p">,</span> <span class="n">M_num</span><span class="p">,</span> <span class="n">O_num</span><span class="p">,</span> <span class="n">Job_constrains</span><span class="p">,</span> <span class="n">Machine_constrains</span><span class="p">)</span>
+
+        <span class="c1"># Cost: 현재 세대의 makespan 리스트</span>
+        <span class="c1"># Cost에서 가장 작은 값의 인덱스를 찾기</span>
+        <span class="n">smallest_indices</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Cost</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">Cost</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1"># Cost과 C를 해당 인덱스 순서로 정렬</span>
+        <span class="c1"># 이후 list slicing을 위해</span>
+        <span class="n">Cost</span> <span class="o">=</span> <span class="p">[</span><span class="n">Cost</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">smallest_indices</span><span class="p">]</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">smallest_indices</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;makespan F: &quot;</span><span class="p">,</span><span class="n">Cost</span><span class="p">)</span>
+
+        <span class="c1"># cost -&gt; fitness 변환</span>
+        <span class="n">this_generation_fitness</span> <span class="o">=</span> <span class="n">fitness_function</span><span class="p">(</span><span class="n">Cost</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">Cost</span><span class="p">))</span>
+
+        
+                         
+        <span class="c1"># C: 염색체 집합 (스케줄링 솔루션), 3가지 initial() 붙인 </span>
+        <span class="c1"># Processing_time: [CKS201] * 3 + [CKS301] * 4  </span>
+        <span class="c1"># M_num (기계 수): 12 </span>
+        <span class="c1"># O_num (operation 수): 3*5 + 4*8 (총 job 7개 중 operation이 5인것 3개, 8인것 4개)</span>
+
+        <span class="n">Best</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># 가장 적합도가 높은 염색체</span>
+        <span class="n">best_cost</span> <span class="o">=</span> <span class="n">Cost</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># fit: makespan이 있는 리스트, 가장 작은값이 best_cost</span>
+        <span class="k">if</span> <span class="n">best_cost</span> <span class="o">&lt;</span> <span class="n">Optimal_cost</span><span class="p">:</span> <span class="c1"># optimal_fit이 바뀌는 경우 (가장 짧은 makespan이 생긴 경우)</span>
+            <span class="n">Optimal_cost</span> <span class="o">=</span> <span class="n">best_cost</span>
+            <span class="n">Optimal_CHS</span> <span class="o">=</span> <span class="n">Best</span>
+            <span class="n">Best_cost</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Optimal_cost</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;best_cost&#39;</span><span class="p">,</span> <span class="n">best_cost</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">Decode</span><span class="p">(</span><span class="n">J</span><span class="p">,</span> <span class="n">Processing_time</span><span class="p">,</span> <span class="n">M_num</span><span class="p">,</span> <span class="n">Job_constrains</span><span class="p">,</span> <span class="n">Machine_constrains</span><span class="p">)</span>
+            <span class="n">Cost</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">Optimal_CHS</span><span class="p">,</span> <span class="n">O_num</span><span class="p">))</span> <span class="c1"># 현재 상태를 Cost에 추가</span>
+            <span class="n">Gantt</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">Machines</span><span class="p">)</span>
+            <span class="n">Gantt_Text</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">Machines</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Best_cost</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Optimal_cost</span><span class="p">)</span> 
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Best_cost</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="c1"># 마지막 10개의 값 추출</span>
+                <span class="n">last_10</span> <span class="o">=</span> <span class="n">Best_cost</span><span class="p">[</span><span class="o">-</span><span class="mi">10</span><span class="p">:]</span>
+                <span class="c1"># 모든 값이 동일한지 확인</span>
+                <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">last_10</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">last_10</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;조기종료 수행...&quot;</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;이번 세대의 유전자 개수: &quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)):</span> <span class="c1"># elite를 제외하고 반복. population prouning을 통해 가장 낮은 10개는 매번 제외한다</span>
+        <span class="c1"># 각 유전자에 대하여</span>
+        <span class="c1"># 1. 80% 확률로 교차 진행 후 교차값 저장 (기계 수준 교차 40% + 작업 수준 교차 40%)</span>
+        <span class="c1"># 2. 30% 확률로 변이 진행 후 변이값 저장 (기계 수준 변이 95% + 작업 수준 변이  5%)</span>
+            <span class="n">Cafter</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># 현재 염색체로부터 나오는 자손 염색체</span>
+            <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">g</span><span class="o">.</span><span class="n">Pc</span><span class="p">:</span> <span class="c1"># 랜덤 값이 교차확률보다 작으면 =&gt; 교차한다</span>
+                <span class="c1">############################</span>
+                <span class="n">N_i</span> <span class="o">=</span> <span class="n">roulette_wheel</span><span class="p">(</span><span class="n">this_generation_fitness</span><span class="p">)</span> <span class="c1"># 룰렛 휠로 선택</span>
+                <span class="c1">######################</span>
+                <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">g</span><span class="o">.</span><span class="n">Pv</span><span class="p">:</span> <span class="c1"># 교차 수행하는 임계값에 따라 1) 기계 수준 교차 or 2) 작업 수준 교차 수행</span>
+                    <span class="n">Cross</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">machine_cross</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">C</span><span class="p">[</span><span class="n">N_i</span><span class="p">],</span> <span class="n">O_num</span><span class="p">)</span> <span class="c1"># 기계 수준 교차 수행</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">Cross</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">operation_cross</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">C</span><span class="p">[</span><span class="n">N_i</span><span class="p">],</span> <span class="n">O_num</span><span class="p">,</span> <span class="n">J_num</span><span class="p">)</span> <span class="c1"># 작업 수준 교차 수행</span>
+                    <span class="c1"># Cross = g.operation_cross2(C[j], C[N_i], O_num) # 변경된 작업 수준 교차</span>
+                <span class="n">Cafter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cross</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="c1"># 교차된 첫번째 자손 추가</span>
+                <span class="n">Cafter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cross</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="c1"># 교차된 두번째 자손 추가</span>
+                <span class="n">Cafter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="c1"># 비교를 위한 원본값 추가</span>
+                <span class="c1"># 현재 코드에서 구현한 cross 방식을 하게되면 9999인 기계가 선택되는 것을 막을 수 없다. 따라서 9999가 있는 makespan이 선택되는 것을 막기 위해 원본값을 추가</span>
+            <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">g</span><span class="o">.</span><span class="n">Pm</span><span class="p">:</span> <span class="c1"># 랜덤 값이 변이확률보다 작으면 =&gt; 변이한다</span>
+                <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">g</span><span class="o">.</span><span class="n">Pw</span><span class="p">:</span> <span class="c1"># 변이 수행하는 임계값에 따라 1) 기계 수준 변이 or 2) 작업 수준 변이 수행</span>
+                    <span class="c1"># Variance = g.machine_variation(C[j], Processing_time, O_num, J)</span>
+                    <span class="n">Variance</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">machine_variation2</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">avail_machine</span><span class="p">,</span> <span class="n">O_num</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="n">Variance</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">operation_variation</span><span class="p">(</span><span class="n">C</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">O_num</span><span class="p">,</span> <span class="n">J_num</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">Processing_time</span><span class="p">,</span> <span class="n">M_num</span><span class="p">)</span>
+                <span class="n">Cafter</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Variance</span><span class="p">)</span> <span class="c1"># 변이된 값을 추가</span>
+            <span class="c1"># 각 유전자에 대해 교차, 변이한 값 중 가장 적합한 염색체 하나를 자식 염색체로</span>
+        
+            <span class="k">if</span> <span class="n">Cafter</span> <span class="o">!=</span> <span class="p">[]:</span> <span class="c1"># 자손이 있다면, 자손에 대해 cost 평가</span>
+                <span class="n">Cafter_Cost</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">cost</span><span class="p">(</span><span class="n">Cafter</span><span class="p">,</span> <span class="n">J</span><span class="p">,</span> <span class="n">Processing_time</span><span class="p">,</span> <span class="n">M_num</span><span class="p">,</span> <span class="n">O_num</span><span class="p">,</span> <span class="n">Job_constrains</span><span class="p">,</span> <span class="n">Machine_constrains</span><span class="p">)</span>
+                <span class="n">C</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Cafter</span><span class="p">[</span><span class="n">Cafter_Cost</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">Cafter_Cost</span><span class="p">))]</span> <span class="c1"># 가장 적합한 염색체로 기존 염색체 대체</span>
+                
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">Cafter</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">:</span> <span class="c1">#기록용</span>
+                    <span class="n">fortherecord_whichischosen</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Cafter_Cost</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">Cafter_Cost</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="n">fortherecord_whichischosen</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">C</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">100</span><span class="p">):</span>
+            <span class="n">end_index</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">10</span><span class="o">+</span><span class="n">i</span><span class="o">//</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">C</span><span class="p">[:</span><span class="o">-</span><span class="p">(</span><span class="mi">10</span><span class="o">+</span><span class="n">i</span><span class="o">//</span><span class="mi">2</span><span class="p">)]</span> <span class="c1"># 가장 성능이 떨어지는 유전자들 가지치기</span>
+            <span class="n">Cost</span> <span class="o">=</span> <span class="n">Cost</span><span class="p">[:</span><span class="o">-</span><span class="p">(</span><span class="mi">10</span><span class="o">+</span><span class="n">i</span><span class="o">//</span><span class="mi">2</span><span class="p">)]</span>
+
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Sohyun.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
